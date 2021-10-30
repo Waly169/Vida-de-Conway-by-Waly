@@ -65,6 +65,10 @@ class Cultivo {
         // i y j son enteros (usamos el gusanillo para convertir)
         let i = ~~(x/this.cellSize);
         let j = ~~(y/this.cellSize);
+
+        // si nos salimos de la cuadricula, no hacemos nada
+        if (i > m-1 || j > n-1) return;
+
         // invertimos el estado de la celula i,j
         this.cultivo[i][j].invertirEstado();
         this.cultivo[i][j].visualizar();
@@ -105,20 +109,33 @@ class Cultivo {
 let m = 20;
 let n = 20;
 let cellSize = 20;
-let fr = 1; //FPS
+let fr = 30; //FPS
+let frameRateDeseado = 1; //FPS
+let playing = false;
 
 // Cultivo de celulas (matriz)
 cultivo = new Cultivo(m, n, cellSize);
 
+let playPauseButton;
 function setup () {
     frameRate(fr);
     stroke('grey');
     createCanvas(m*cellSize, n*cellSize);
+    playPauseButton = createButton('Play');
+    playPauseButton.mousePressed(playPause);
 }
 
+let calcular = 0;
 function draw () {
-    cultivo.calcular();
-    cultivo.visualizar();
+    // Ajustar el framerate sin perder responsiveness
+    if (calcular++ == ~~(fr/frameRateDeseado)) {
+        calcular = 0;
+        
+        if (playing) {
+            cultivo.calcular();
+            cultivo.visualizar();
+        }
+    }
 }
 
 function mouseClicked() {
@@ -126,4 +143,15 @@ function mouseClicked() {
 
     // Prevent default
     return false;
+}
+
+function playPause() {
+    // Invertimos el valor logico de playing
+    if (playing) {
+        playPauseButton.html('Play');
+        playing = false;
+    } else {
+        playPauseButton.html('Pause');
+        playing = true;
+    }
 }

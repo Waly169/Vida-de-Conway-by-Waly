@@ -5,13 +5,14 @@ class Celula {
         this.j = j;
         this.size = size;
         this.x0 = this.i * size;
-        this.x1 = (this.i + 1) * size;
         this.y0 = this.j * size;
-        this.y1 = (this.j + 1) * size;
+        this.siguienteEstado = 0;
     }
 
     // Visualiza la celula actual
     visualizar() {
+        this.estado = this.siguienteEstado;
+
         if (this.estado == 0) {
             fill('white');
         } else {
@@ -21,13 +22,19 @@ class Celula {
     }
 
     // Calcula si la celula estara viva o muerta en la siguiente iteracion
-    calcular() {
-
+    calcular(nVecinosVivos) {
+        if (this.estado == 0 && nVecinosVivos == 3) {
+            this.siguienteEstado = 1;
+        } else if (this.estado == 1 && (nVecinosVivos > 3 || nVecinosVivos < 2)) {
+            this.siguienteEstado = 0;
+        } else {
+            this.siguienteEstado = this.estado;
+        }
     }
 
     // Invierte el estado (vivo -> muerto, muerto -> vivo)
     invertirEstado() {
-        this.estado = this.estado == 0 ? 1 : 0;
+        this.siguienteEstado = this.estado == 0 ? 1 : 0;
     }
 }
 
@@ -62,13 +69,43 @@ class Cultivo {
         this.cultivo[i][j].invertirEstado();
         this.cultivo[i][j].visualizar();
     }
+
+    nVecinosVivos(i, j) {
+        let nVecinosVivos = 0;
+        let i_vecinoInicial = i > 0 ? i-1 : 0;
+        let i_vecinoFinal = i < this.m-1 ? i+1 : this.m-1;
+        let j_vecinoInicial = j > 0 ? j-1 : 0;
+        let j_vecinoFinal = j < this.n-1 ? j+1 : this.n-1;
+
+        for (let i_vecino=i_vecinoInicial; i_vecino<=i_vecinoFinal; i_vecino++) {
+            for (let j_vecino=j_vecinoInicial; j_vecino<=j_vecinoFinal; j_vecino++) {
+                // No contamos a la celula actual
+                if (i == i_vecino && j == j_vecino) {
+                    continue;
+                }
+                nVecinosVivos += this.cultivo[i_vecino][j_vecino].estado;
+            }    
+        }
+
+        return nVecinosVivos;
+    }
+
+    calcular() {
+        // Calcular para cada celula
+        for (let i=0; i<this.m; i++) {
+            for (let j=0; j<this.n; j++) {
+                let nVecinosVivos = this.nVecinosVivos(i,j);
+                this.cultivo[i][j].calcular(nVecinosVivos);
+            }
+        }
+    }
 }
 
 // Configuracion
 let m = 20;
 let n = 20;
 let cellSize = 20;
-let fr = 2; //FPS
+let fr = 1; //FPS
 
 // Cultivo de celulas (matriz)
 cultivo = new Cultivo(m, n, cellSize);
@@ -79,7 +116,8 @@ function setup () {
     createCanvas(m*cellSize, n*cellSize);
 }
 
-function draw (){
+function draw () {
+    cultivo.calcular();
     cultivo.visualizar();
 }
 

@@ -51,6 +51,7 @@ class Cultivo {
                 this.cultivo[i][j] = new Celula(0, i, j, cellSize);
             }
         }
+        this.visualizar();
     }
 
     visualizar() {
@@ -114,25 +115,36 @@ let frameRateDeseado = 1; //FPS
 let playing = false;
 
 // Cultivo de celulas (matriz)
-cultivo = new Cultivo(m, n, cellSize);
+let cultivo;
 
 // UI
-let playPauseButton;
-let frSlider;
+let playPause_button;
+let frameRate_slider;
+let m_input;
+let n_input;
+let redimensionar_button;
 
 function setup () {
     frameRate(fr);
     stroke('grey');
     createCanvas(m*cellSize, n*cellSize);
-    playPauseButton = createButton('Play');
-    playPauseButton.mousePressed(playPause);
-    frSlider = createSlider(1, 30, 10);
+    cultivo = new Cultivo(m, n, cellSize);
+
+    // UI
+    playPause_button = createButton('Play');
+    playPause_button.mousePressed(playPause);
+    frameRate_slider = createSlider(1, 30, 10);
+    m_input = createInput(m.toString());
+    n_input = createInput(n.toString());
+    redimensionar_button = createButton('Redimensionar');
+    redimensionar_button.mousePressed(redimensionar);
+
 }
 
 let calcular = 0;
 function draw () {
     // Ajustar el framerate sin perder responsiveness
-    frameRateDeseado = frSlider.value();
+    frameRateDeseado = frameRate_slider.value();
     if (calcular++ >= ~~(fr/frameRateDeseado)) {
         calcular = 0;
         
@@ -153,10 +165,22 @@ function mouseClicked() {
 function playPause() {
     // Invertimos el valor logico de playing
     if (playing) {
-        playPauseButton.html('Play');
+        playPause_button.html('Play');
         playing = false;
     } else {
-        playPauseButton.html('Pause');
+        playPause_button.html('Pause');
         playing = true;
+    }
+}
+
+function redimensionar() {
+    playPause_button.html('Play');
+    playing = false;
+    if (confirm("Atencion, su cultivo se destruira!")) {
+        delete cultivo;
+        m = ~~m_input.value();
+        n = ~~n_input.value();
+        resizeCanvas(m*cellSize, n*cellSize);
+        cultivo = new Cultivo(m, n, cellSize);
     }
 }

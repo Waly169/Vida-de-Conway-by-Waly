@@ -116,19 +116,24 @@ let playing = false;
 // Cultivo de celulas (matriz)
 cultivo = new Cultivo(m, n, cellSize);
 
+// UI
 let playPauseButton;
+let frSlider;
+
 function setup () {
     frameRate(fr);
     stroke('grey');
     createCanvas(m*cellSize, n*cellSize);
     playPauseButton = createButton('Play');
     playPauseButton.mousePressed(playPause);
+    frSlider = createSlider(1, 30, 10);
 }
 
 let calcular = 0;
 function draw () {
     // Ajustar el framerate sin perder responsiveness
-    if (calcular++ == ~~(fr/frameRateDeseado)) {
+    frameRateDeseado = frSlider.value();
+    if (calcular++ >= ~~(fr/frameRateDeseado)) {
         calcular = 0;
         
         if (playing) {

@@ -1,12 +1,20 @@
 class Celula {
+    #size;
+
     constructor(estado, i, j, size) {
         this.estado = estado;
         this.i = i;
         this.j = j;
-        this.size = size;
-        this.x0 = this.i * size;
-        this.y0 = this.j * size;
+        this.#size = size;
+        this.x0 = this.i * this.#size;
+        this.y0 = this.j * this.#size;
         this.siguienteEstado = 0;
+    }
+
+    set size(newSize) {
+        this.#size = newSize;
+        this.x0 = this.i * this.#size;
+        this.y0 = this.j * this.#size;
     }
 
     // Visualiza la celula actual
@@ -18,7 +26,7 @@ class Celula {
         } else {
             fill('black');
         }
-        rect(this.x0, this.y0, this.size, this.size);
+        rect(this.x0, this.y0, this.#size, this.#size);
     }
 
     // Calcula si la celula estara viva o muerta en la siguiente iteracion
@@ -39,10 +47,12 @@ class Celula {
 }
 
 class Cultivo {
+    #cellSize;
+
     constructor(m, n, cellSize) {
         this.m = m;
         this.n = n;
-        this. cellSize = cellSize;
+        this.#cellSize = cellSize;
         
         this.cultivo = new Array(m).fill(0).map(x => Array(n).fill(0));
 
@@ -64,8 +74,8 @@ class Cultivo {
 
     invertirEstadoCelula(x, y) {
         // i y j son enteros (usamos el gusanillo para convertir)
-        let i = ~~(x/this.cellSize);
-        let j = ~~(y/this.cellSize);
+        let i = ~~(x/this.#cellSize);
+        let j = ~~(y/this.#cellSize);
 
         // si nos salimos de la cuadricula, no hacemos nada
         if (i > m-1 || j > n-1) return;
@@ -104,6 +114,17 @@ class Cultivo {
             }
         }
     }
+
+    set cellSize(newSize) {
+        this.#cellSize = newSize;
+        console.log(newSize);
+        for (let i=0; i<this.m; i++) {
+            for (let j=0; j<this.n; j++) {
+                this.cultivo[i][j].size = newSize;
+            }
+        }
+        this.visualizar();
+    }
 }
 
 // Configuracion
@@ -123,6 +144,7 @@ let frameRate_slider;
 let m_input;
 let n_input;
 let redimensionar_button;
+let cellSize_slider;
 
 function setup () {
     frameRate(fr);
@@ -138,7 +160,8 @@ function setup () {
     n_input = createInput(n.toString());
     redimensionar_button = createButton('Redimensionar');
     redimensionar_button.mousePressed(redimensionar);
-
+    cellSize_slider = createSlider(3, 30, cellSize);
+    cellSize_slider.mouseClicked(actualizarCellSize);
 }
 
 let calcular = 0;
@@ -183,4 +206,13 @@ function redimensionar() {
         resizeCanvas(m*cellSize, n*cellSize);
         cultivo = new Cultivo(m, n, cellSize);
     }
+}
+
+// Ajusta el tamanio de las celulas
+function actualizarCellSize() {
+    cellSize = ~~cellSize_slider.value();
+    strokeWeight(cellSize/10);
+    stroke('grey');
+    resizeCanvas(m*cellSize, n*cellSize);
+    cultivo.cellSize = cellSize;
 }

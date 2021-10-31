@@ -18,15 +18,17 @@ class Celula {
     }
 
     // Visualiza la celula actual
-    visualizar() {
-        this.estado = this.siguienteEstado;
-
-        if (this.estado == 0) {
-            fill('white');
-        } else {
-            fill('black');
+    visualizar(forzar = false) {
+        if (forzar || this.estado != this.siguienteEstado){
+            this.estado = this.siguienteEstado;
+    
+            if (this.estado == 0) {
+                fill('white');
+            } else {
+                fill('black');
+            }
+            rect(this.x0, this.y0, this.#size, this.#size);
         }
-        rect(this.x0, this.y0, this.#size, this.#size);
     }
 
     // Calcula si la celula estara viva o muerta en la siguiente iteracion
@@ -61,13 +63,13 @@ class Cultivo {
                 this.cultivo[i][j] = new Celula(0, i, j, cellSize);
             }
         }
-        this.visualizar();
+        this.visualizar(true);
     }
 
-    visualizar() {
+    visualizar(forzar = false) {
         for (let i=0; i<this.m; i++) {
             for (let j=0; j<this.n; j++) {
-                this.cultivo[i][j].visualizar();
+                this.cultivo[i][j].visualizar(forzar);
             }
         }
     }
@@ -94,13 +96,12 @@ class Cultivo {
 
         for (let i_vecino=i_vecinoInicial; i_vecino<=i_vecinoFinal; i_vecino++) {
             for (let j_vecino=j_vecinoInicial; j_vecino<=j_vecinoFinal; j_vecino++) {
-                // No contamos a la celula actual
-                if (i == i_vecino && j == j_vecino) {
-                    continue;
-                }
                 nVecinosVivos += this.cultivo[i_vecino][j_vecino].estado;
             }    
         }
+
+        // No contamos a la celula actual
+        nVecinosVivos -= this.cultivo[i][j].estado;
 
         return nVecinosVivos;
     }
@@ -117,13 +118,12 @@ class Cultivo {
 
     set cellSize(newSize) {
         this.#cellSize = newSize;
-        console.log(newSize);
         for (let i=0; i<this.m; i++) {
             for (let j=0; j<this.n; j++) {
                 this.cultivo[i][j].size = newSize;
             }
         }
-        this.visualizar();
+        this.visualizar(true);
     }
 }
 
